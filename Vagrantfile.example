@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "bento/centos-7"
+
+  # Changeme
+  config.vm.network "public_network", ip: "192.168.1.56"
+
+  config.vm.provider "virtualbox" do |vb|
+     vb.cpus = 4
+     vb.memory = "4024"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+     # set hostname
+     # Changeme
+     hostnamectl set-hostname ipa1.linuxdict.com
+
+     # Add default route
+     route add default gw 192.168.1.1
+
+     # Update DNS server
+     echo "nameserver 192.168.1.79" > /etc/resolv.conf
+     echo "search linuxdict.com" >> /etc/resolv.conf
+
+     # get the repo
+     curl -o /etc/yum.repos.d/local.repo http://192.168.1.77/repos/local.repo
+
+     # put the key for auto-login
+     mkdir /root/.ssh
+     chmod 0700 /root/.ssh
+     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHsgwV2rO4hvhqKjdiMEh/KOpCaHKwY/UdADED6RPni6KOarYvRoQfA30MT1Zd+ql7a9RLOe2pfASflVoFrhzanRnv8Y6m3hfbfY/ijpsrs4fhu7pU5KznZpQv0pr1ohNsiy9rQ3sALWtCW1zk9EWkIAb1xFGFAoZHY5emuOfMpOtckTjvNm97xTrZ51d/3y5LbaIdMXAtkY6feU7eCsQme/F5mo6vPTgRdu3+sy3ktAAGr3Enhwho+5v797LYodMIsNMjUnueHYelxUB9xC/LazIr4gl2jUaT0aS9OlU9Gn9p1uO2+g+ERGoSMYhuGBsc+sWw4qVB9GctLwwNUw/d hmsrv1" > /root/.ssh/authorized_keys
+     chmod 0600 /root/.ssh/authorized_keys
+
+  SHELL
+end
