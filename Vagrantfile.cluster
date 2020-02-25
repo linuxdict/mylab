@@ -1,0 +1,39 @@
+# This defines the version of vagrant
+Vagrant.configure(2) do |config|
+	# Specifying the box we wish to use
+	config.vm.box = "generic/oracle7"
+	# Adding Bridged Network Adapter
+	config.vm.network "private_network", type: "dhcp",
+	  virtualbox__intnet: "lab-intnet"
+	# Disable automount shared folder
+	config.vm.synced_folder ".", "/vagrant", disabled: true
+
+	# Define management node
+	config.vm.define "ceph-mgt" do |node|
+		# Specifying the provider as VirtualBox and naming the VM's
+		config.vm.provider "virtualbox" do |node|
+			# Every VM Memory
+			node.memory = 6096
+			# Every CPU count
+			node.cpus = 4
+			# The VM will be named as lab-mgt1
+			node.name = "ceph-mgt1"
+		end
+	end
+
+	# Iterating the loop for three times
+	(1..3).each do |i|
+		# Defining VM properties
+		config.vm.define "ceph-node#{i}" do |node|
+			# Specifying the provider as VirtualBox and naming the VM's
+			config.vm.provider "virtualbox" do |node|
+				# Every VM Memory
+				node.memory = 4096
+				# Every CPU count
+				node.cpus = 4
+				# The VM will be named as lab-n{i}
+				node.name = "ceph-node#{i}"  
+			end
+		end
+	end
+end
